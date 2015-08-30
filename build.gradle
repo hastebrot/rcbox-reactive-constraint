@@ -1,0 +1,70 @@
+//-------------------------------------------------------------------------------------------------
+// GRADLE SCRIPTS.
+//-------------------------------------------------------------------------------------------------
+
+buildscript {
+    repositories {
+        maven { url "http://repository.jetbrains.com/all" }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:0.1-SNAPSHOT"
+    }
+}
+
+//-------------------------------------------------------------------------------------------------
+// ROOT PROJECT.
+//-------------------------------------------------------------------------------------------------
+
+project(":") { project ->
+    // provide assemble and clean tasks.
+    apply plugin: "base"
+
+    // task to add gradle wrapper files.
+    task wrapper(type: Wrapper, group: "build setup") {
+        gradleVersion = "2.6" // released on 10th august 2015.
+        distributionUrl = "https://services.gradle.org/distributions/" +
+            "gradle-${gradleVersion}-all.zip"
+    }
+
+    // task to print gradle and groovy versions.
+    task versions(group: "help") << {
+        println "Java version: ${System.properties["java.version"]}"
+        println "Gradle version: ${project.gradle.gradleVersion}"
+        println "Groovy version: ${GroovySystem.version}"
+    }
+    
+    apply plugin: "kotlin"
+
+    repositories {
+        maven { url "http://repository.jetbrains.com/all" }
+        mavenCentral()
+    }
+
+    // main source dependencies.
+    dependencies {
+        compile "org.jetbrains.kotlin:kotlin-compiler:0.1-SNAPSHOT"
+        compile "org.jetbrains.kotlin:kotlin-stdlib:0.1-SNAPSHOT"
+    }
+
+    // test source dependencies.
+    dependencies {
+        // junit test framework and hamcrest assertions.
+        testCompile "junit:junit:4.12"
+        testCompile "org.hamcrest:hamcrest-all:1.3"
+    }
+}
+
+//-------------------------------------------------------------------------------------------------
+// ALL PROJECTS.
+//-------------------------------------------------------------------------------------------------
+
+allprojects { project ->
+    // task to create main and test source directories.
+    task sourceDirs(group: "build setup") << {
+        if (project != rootProject) {
+            sourceSets*.allSource.srcDirs*.each { it.mkdirs() }
+            sourceSets*.resources.srcDirs*.each { it.mkdirs() }
+        }
+    }
+}
